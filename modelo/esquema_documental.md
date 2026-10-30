@@ -1,7 +1,5 @@
 # Esquema documental — colección `pedidos` (base `foodstore_nosql`)
 
-> BORRADOR de Mariano (Parte 1). Los valores concretos (ids, estado, producto, umbral) se confirman al ejecutar.
-
 ## 1. Subconjunto elegido (consigna 1)
 
 Pedidos y detalle de pedidos de Food Store. Tablas y claves en PostgreSQL:
@@ -18,7 +16,7 @@ Pedidos y detalle de pedidos de Food Store. Tablas y claves en PostgreSQL:
 ```js
 {
   _id: 1,                              // pedido.id de origen
-  fecha: ISODate("..."),               // pedido.fecha (DATE)
+  fecha: ISODate("2026-10-30T00:00:00Z"),  // pedido.fecha (DATE)
   estado: "CONFIRMADO",                // estado_pedido
   forma_pago: "EFECTIVO",
   total: NumberDecimal("9400.00"),     // pedido.total tal cual está en PostgreSQL
