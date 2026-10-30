@@ -1,0 +1,87 @@
+# Food Store: pedidos en MongoDB y comparación con PostgreSQL
+
+Tecnicatura Universitaria en Programación · Bases de Datos II · Trabajo práctico de la Unidad 7 (NoSQL)
+
+**Integrantes:** Mariano Chirino, Andrés, Facundo
+**Repositorio:** https://github.com/marianoemir/TP-Unidad7-BD2
+
+## 1. Modelo documental
+
+Se migró el subconjunto **pedidos y detalle de pedidos** a una única colección, `pedidos`, en la base `foodstore_nosql`. Cada documento es un pedido completo, con el cliente y las líneas embebidos. Las tablas de origen en PostgreSQL y sus claves son:
+
+| Tabla | Clave primaria | Claves foráneas | Qué se toma |
+|---|---|---|---|
+| `pedido` | `id` | `usuario_id → usuario.id` | fecha, estado, total, forma_pago |
+| `detalle_pedido` | `id` | `pedido_id → pedido.id`; `producto_id → producto.id`; `UNIQUE (pedido_id, producto_id)` | cantidad, precio_unitario, subtotal |
+| `usuario` | `id` | — | nombre, apellido, mail (copia embebida) |
+| `producto` | `id` | `categoria_id → categoria.id` | nombre (copia embebida) |
+
+Documento real del pedido 1 (`_id` = `pedido.id`; objeto embebido `cliente`; arreglo `lineas`):
+
+```js
+{ _id: 1, fecha: ISODate("2026-10-30T00:00:00Z"), estado: "CONFIRMADO", forma_pago: "EFECTIVO",
+  total: Decimal128("9400.00"),
+  cliente: { usuario_id: 1, nombre: "Ana", apellido: "García", mail: "ana.garcia@mail.com" },
+  lineas: [
+    { detalle_id: 1, producto_id: 1, nombre: "Muzzarella", cantidad: 2,
+      precio_unitario: Decimal128("3500.00"), subtotal: Decimal128("7000.00") },
+    { detalle_id: 2, producto_id: 7, nombre: "Coca-Cola 500ml", cantidad: 2,
+      precio_unitario: Decimal128("1200.00"), subtotal: Decimal128("2400.00") } ],
+  origen: "data.sql" }
+```
+
+**Identificadores conservados:** `_id` (pedido.id), `cliente.usuario_id`, `lineas[].detalle_id` y `lineas[].producto_id`. **No se migra** `contrasena`, `celular` ni `rol`, ni los registros con `eliminado = TRUE` (el pedido 4).
+
+| PostgreSQL | MongoDB | Motivo |
+|---|---|---|
+| NUMERIC(12,2) (importes) | Decimal128 | Evita el error binario de Double en importes |
+| INTEGER (cantidad) | Int32 | Respeta el tipo entero |
+| DATE (fecha) | Date (medianoche UTC) | Consultable por rango; la zona horaria es una decisión de modelo |
+| ENUM (estado, forma_pago); BIGINT (ids) | string; número | Conserva los valores e identificadores existentes |
+
+## 2. Migración e integridad
+
+El JSON se generó desde PostgreSQL con `modelo/exportar_pedidos.sql` (sin tipear datos) y se cargó con `insertMany()` desde `consultas_mongodb.js`. Pedidos migrados: **1, 2, 3, 5 y 6** (los vigentes de `data.sql`). Resultado real: *Insertados: 5*, *countDocuments: 5*. Los importes y estados se copiaron tal cual, sin recalcular. Las fechas son las del día en que se ejecutó `data.sql` (2026-10-30).
+
+**Dos reglas de integridad que se conservaron** (en PostgreSQL las garantizan constraints y triggers; en MongoDB se verifican después de migrar y se refuerzan con un validador `$jsonSchema`):
+
+| Regla | Cómo se verificó | Resultado |
+|---|---|---|
+| 1. Coherencia de importes: total = suma de subtotales, y subtotal = cantidad × precio_unitario | Agregación que busca documentos donde la suma de subtotales difiere del total | 0 documentos |
+| 2. Líneas válidas y vigentes: cantidad > 0, estado permitido y sin registros eliminados | Validador de esquema (cantidad ≥ 1, estado en el conjunto permitido) y búsqueda de cantidad ≤ 0 | 0 documentos |
+
+**Qué se embebió y por qué.** Las líneas de detalle se leen siempre junto al pedido, no tienen sentido sin él y son pocas por pedido: un solo acceso y sin JOIN. El cliente y el nombre del producto evitan consultar otras colecciones para mostrar un pedido. Se guarda el *precio histórico* de cada línea, no el precio actual del producto. **Costo:** lo embebido es una copia al momento de migrar; si el cliente cambia de mail, el documento no se actualiza. No se embebió el catálogo completo ni datos sensibles.
+
+## 3. Consultas en MongoDB
+
+| Consulta | Instrucción | Resultado real |
+|---|---|---|
+| a) Todos (_id y estado) | `db.pedidos.find({}, { estado: 1 })` | 5 pedidos: 1 CONFIRMADO, 2 TERMINADO, 3 PENDIENTE, 5 PENDIENTE, 6 CANCELADO |
+| b) Por estado | `db.pedidos.find({ estado: "PENDIENTE" })` | 2 pedidos: ids [3, 5] |
+| c) Por producto en el arreglo | `db.pedidos.find({ "lineas.producto_id": 1 })` | 1 pedido: ids [1] (producto 1 = Muzzarella) |
+| d) Total mayor a un umbral | `db.pedidos.find({ total: { $gt: NumberDecimal("10000.00") } })` | 2 pedidos: ids [2, 5] (totales 11900.00 y 18700.00) |
+
+**Umbral de d):** 10000.00. Los totales migrados son 9400, 11900, 5300, 18700 y 3200 (promedio 9700); el umbral queda apenas por encima del promedio y separa los pedidos grandes de los chicos. La variante con `$elemMatch` (producto 1 con cantidad ≥ 2) también devuelve el pedido 1.
+
+### Capturas de Compass
+
+![Colección pedidos con sus 5 documentos](evidencias/compass_coleccion.png)
+
+![Documento del pedido 1 con cliente y líneas, con los tipos de cada campo](evidencias/compass_pedido1.png)
+
+## 4. Tabla de verificación PostgreSQL vs. MongoDB
+
+| Consulta | Cantidad en PostgreSQL | Cantidad en MongoDB | ¿Coinciden los IDs? |
+|---|---|---|---|
+| Estado seleccionado (PENDIENTE) | PENDIENTE: completar (Andrés) | 2 — ids [3, 5] | PENDIENTE: completar (Andrés) |
+| Producto seleccionado (producto 1) | PENDIENTE: completar (Andrés) | 1 — ids [1] | PENDIENTE: completar (Andrés) |
+
+> **PENDIENTE — Andrés:** completar la columna de PostgreSQL con la ejecución real de `consultas_postgresql.sql` (limitada a los mismos ids migrados y a registros vigentes), indicar si los ids coinciden y explicar cualquier diferencia.
+
+## 5. Contraste de afirmaciones de la IA
+
+> **PENDIENTE — Facundo:** dos afirmaciones concretas de la respuesta de la IA (consigna 6), cada una contrastada con la documentación oficial de MongoDB o con un resultado del laboratorio, indicando si se sostiene.
+
+## 6. Conclusión
+
+> **PENDIENTE — Facundo:** hasta 200 palabras, con al menos dos criterios técnicos, que responda si conviene mantener PostgreSQL, usar MongoDB para este subconjunto o combinar ambas tecnologías.
