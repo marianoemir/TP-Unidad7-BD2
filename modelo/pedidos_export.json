@@ -166,5 +166,69 @@
             "usuario_id": 5
         },
         "forma_pago": "EFECTIVO"
+    },
+    {
+        "_id": 7,
+        "fecha": "2026-10-31",
+        "total": "4200.00",
+        "estado": "PENDIENTE",
+        "lineas": [
+            {
+                "nombre": "Muzzarella",
+                "cantidad": 1,
+                "subtotal": "3500.00",
+                "detalle_id": 14,
+                "producto_id": 1,
+                "precio_unitario": "3500.00"
+            },
+            {
+                "nombre": "Agua mineral 500ml",
+                "cantidad": 1,
+                "subtotal": "700.00",
+                "detalle_id": 15,
+                "producto_id": 8,
+                "precio_unitario": "700.00"
+            }
+        ],
+        "origen": "prueba",
+        "cliente": {
+            "mail": "juan.perez@mail.com",
+            "nombre": "Juan",
+            "apellido": "Pérez",
+            "usuario_id": 2
+        },
+        "forma_pago": "TARJETA"
+    },
+    {
+        "_id": 8,
+        "fecha": "2026-10-31",
+        "total": "11700.00",
+        "estado": "PENDIENTE",
+        "lineas": [
+            {
+                "nombre": "Muzzarella",
+                "cantidad": 3,
+                "subtotal": "10500.00",
+                "detalle_id": 16,
+                "producto_id": 1,
+                "precio_unitario": "3500.00"
+            },
+            {
+                "nombre": "Coca-Cola 500ml",
+                "cantidad": 1,
+                "subtotal": "1200.00",
+                "detalle_id": 17,
+                "producto_id": 7,
+                "precio_unitario": "1200.00"
+            }
+        ],
+        "origen": "prueba",
+        "cliente": {
+            "mail": "lucia.martinez@mail.com",
+            "nombre": "Lucía",
+            "apellido": "Martínez",
+            "usuario_id": 3
+        },
+        "forma_pago": "EFECTIVO"
     }
 ]

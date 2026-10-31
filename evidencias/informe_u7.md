@@ -41,7 +41,7 @@ Documento real del pedido 1 (`_id` = `pedido.id`; objeto embebido `cliente`; arr
 
 ## 2. Migración e integridad
 
-El JSON se generó desde PostgreSQL con `modelo/exportar_pedidos.sql` (sin tipear datos) y se cargó con `insertMany()` desde `consultas_mongodb.js`. Pedidos migrados: **1, 2, 3, 5 y 6** (los vigentes de `data.sql`). Resultado real: *Insertados: 5*, *countDocuments: 5*. Los importes y estados se copiaron tal cual, sin recalcular. Las fechas son las del día en que se ejecutó `data.sql` (2026-10-30).
+El JSON se generó desde PostgreSQL con `modelo/exportar_pedidos.sql` (sin tipear datos) y se cargó con `insertMany()` desde `consultas_mongodb.js`. Pedidos migrados: **1, 2, 3, 5, 6, 7 y 8**: los cinco vigentes de `data.sql` y dos pedidos de prueba (7 y 8, con `origen: "prueba"`), creados con `sp_crear_pedido` mediante `modelo/pedidos_de_prueba.sql` para que un mismo producto aparezca en más de un pedido. Resultado real: *Insertados: 7*, *countDocuments: 7*. Los importes y estados se copiaron tal cual, sin recalcular. Las fechas de los pedidos de `data.sql` son las del día en que se ejecutó (2026-10-30); las de los pedidos de prueba, las del día en que se crearon en cada equipo (2026-10-31 en la base usada para migrar). La fecha no interviene en la comparación entre motores.
 
 **Dos reglas de integridad que se conservaron** (en PostgreSQL las garantizan constraints y triggers; en MongoDB se verifican después de migrar y se refuerzan con un validador `$jsonSchema`):
 
@@ -56,27 +56,29 @@ El JSON se generó desde PostgreSQL con `modelo/exportar_pedidos.sql` (sin tipea
 
 | Consulta | Instrucción | Resultado real |
 |---|---|---|
-| a) Todos (_id y estado) | `db.pedidos.find({}, { estado: 1 })` | 5 pedidos: 1 CONFIRMADO, 2 TERMINADO, 3 PENDIENTE, 5 PENDIENTE, 6 CANCELADO |
-| b) Por estado | `db.pedidos.find({ estado: "PENDIENTE" })` | 2 pedidos: ids [3, 5] |
-| c) Por producto en el arreglo | `db.pedidos.find({ "lineas.producto_id": 1 })` | 1 pedido: ids [1] (producto 1 = Muzzarella) |
-| d) Total mayor a un umbral | `db.pedidos.find({ total: { $gt: NumberDecimal("10000.00") } })` | 2 pedidos: ids [2, 5] (totales 11900.00 y 18700.00) |
+| a) Todos (_id y estado) | `db.pedidos.find({}, { estado: 1 })` | 7 pedidos: 1 CONFIRMADO, 2 TERMINADO, 3 PENDIENTE, 5 PENDIENTE, 6 CANCELADO, 7 PENDIENTE, 8 PENDIENTE |
+| b) Por estado | `db.pedidos.find({ estado: "PENDIENTE" })` | 4 pedidos: ids [3, 5, 7, 8] |
+| c) Por producto en el arreglo | `db.pedidos.find({ "lineas.producto_id": 1 })` | 3 pedidos: ids [1, 7, 8] (producto 1 = Muzzarella) |
+| d) Total mayor a un umbral | `db.pedidos.find({ total: { $gt: NumberDecimal("10000.00") } })` | 3 pedidos: ids [2, 5, 8] (totales 11900.00, 18700.00 y 11700.00) |
 
-**Umbral de d):** 10000.00. Los totales migrados son 9400, 11900, 5300, 18700 y 3200 (promedio 9700); el umbral queda apenas por encima del promedio y separa los pedidos grandes de los chicos. La variante con `$elemMatch` (producto 1 con cantidad ≥ 2) también devuelve el pedido 1.
+**Umbral de d):** 10000.00. Los totales migrados son 9400, 11900, 5300, 18700, 3200, 4200 y 11700 (promedio 9200); el umbral queda por encima del promedio y separa los pedidos grandes de los chicos. La variante con `$elemMatch` (producto 1 con cantidad ≥ 2 en la misma línea) devuelve los pedidos 1 y 8, y deja afuera el 7, que lo pidió con cantidad 1.
 
 ### Capturas de Compass
 
-![Colección pedidos con sus 5 documentos](evidencias/compass_coleccion.png)
+![Colección pedidos en Compass (vista de tabla): 7 documentos; _id Int32, fecha Date, total Decimal128, estado String](evidencias/compass_coleccion.png)
 
-![Documento del pedido 1 con cliente y líneas, con los tipos de cada campo](evidencias/compass_pedido1.png)
+![Documento del pedido 1 con cliente y líneas embebidos; importes en Decimal128](evidencias/compass_pedido1.png)
 
 ## 4. Tabla de verificación PostgreSQL vs. MongoDB
 
 | Consulta | Cantidad en PostgreSQL | Cantidad en MongoDB | ¿Coinciden los IDs? |
 |---|---|---|---|
-| Estado seleccionado (PENDIENTE) | PENDIENTE: completar (Andrés) | 2 — ids [3, 5] | PENDIENTE: completar (Andrés) |
-| Producto seleccionado (producto 1) | PENDIENTE: completar (Andrés) | 1 — ids [1] | PENDIENTE: completar (Andrés) |
+| Estado seleccionado (PENDIENTE) | 4 — ids [3, 5, 7, 8] | 4 — ids [3, 5, 7, 8] | Sí |
+| Producto seleccionado (producto 1) | 3 — ids [1, 7, 8] | 3 — ids [1, 7, 8] | Sí |
 
-> **PENDIENTE — Andrés:** completar la columna de PostgreSQL con la ejecución real de `consultas_postgresql.sql` (limitada a los mismos ids migrados y a registros vigentes), indicar si los ids coinciden y explicar cualquier diferencia.
+Las consultas de PostgreSQL (`consultas_postgresql.sql`) se limitan a los mismos ids migrados y a registros vigentes (`eliminado = FALSE`; en c), en `pedido` y en `detalle_pedido`), por lo que el pedido 4, dado de baja, no se cuenta. Salidas en `evidencias/postgres_b.txt` y `evidencias/postgres_c.txt` (PostgreSQL 16, base `foodstore7`) y en `evidencias/mongo_migracion_y_consultas.txt`.
+
+**Diferencia detectada y corregida.** En una primera comparación los motores no coincidían: PostgreSQL, con los pedidos de prueba 7 y 8, devolvía 4 pedidos PENDIENTE y 3 con el producto 1, mientras que MongoDB, migrado solo con los cinco pedidos de `data.sql`, devolvía 2 (ids [3, 5]) y 1 (id [1]). La causa era que los pedidos 7 y 8 no estaban migrados. Se agregaron al export y se migró de nuevo (7 documentos); desde entonces los resultados coinciden. No cambiaron ni el modelo ni las consultas, y no se ajustaron datos.
 
 ## 5. Contraste de afirmaciones de la IA
 

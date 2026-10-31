@@ -6,7 +6,7 @@
 -- Uso (desde la raiz del repo):
 --   psql -U postgres -d foodstore -t -A -f modelo/exportar_pedidos.sql -o modelo/pedidos_export.json
 --
--- IDs a migrar: vigentes de data.sql (1,2,3,5,6). El pedido 4 esta dado de baja.
+-- IDs a migrar: vigentes de data.sql (1,2,3,5,6,7,8). El pedido 4 esta dado de baja.
 -- Si Andres crea pedidos de prueba, agregar sus ids a la lista (queda origen = 'prueba').
 -- Nunca se exporta contrasena, celular ni rol.
 -- ============================================================
@@ -36,5 +36,5 @@ SELECT jsonb_pretty(jsonb_agg(doc ORDER BY id)) FROM (
   FROM pedido p
   JOIN usuario u ON u.id = p.usuario_id
   WHERE p.eliminado = FALSE
-    AND p.id IN (1, 2, 3, 5, 6)
+    AND p.id IN (1, 2, 3, 5, 6, 7 ,8)
 ) t;

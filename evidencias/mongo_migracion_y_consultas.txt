@@ -1,5 +1,5 @@
-﻿Insertados: 5
-countDocuments: 5
+﻿Insertados: 7
+countDocuments: 7
 
 --- Regla 1 - total distinto de la suma de subtotales (esperado: []) ---
 []
@@ -28,6 +28,14 @@ countDocuments: 5
   {
     _id: 6,
     estado: 'CANCELADO'
+  },
+  {
+    _id: 7,
+    estado: 'PENDIENTE'
+  },
+  {
+    _id: 8,
+    estado: 'PENDIENTE'
   }
 ]
 
@@ -104,9 +112,73 @@ countDocuments: 5
       usuario_id: 4
     },
     forma_pago: 'EFECTIVO'
+  },
+  {
+    _id: 7,
+    fecha: ISODate('2026-10-31T00:00:00.000Z'),
+    total: Decimal128('4200.00'),
+    estado: 'PENDIENTE',
+    lineas: [
+      {
+        nombre: 'Muzzarella',
+        cantidad: 1,
+        subtotal: Decimal128('3500.00'),
+        detalle_id: 14,
+        producto_id: 1,
+        precio_unitario: Decimal128('3500.00')
+      },
+      {
+        nombre: 'Agua mineral 500ml',
+        cantidad: 1,
+        subtotal: Decimal128('700.00'),
+        detalle_id: 15,
+        producto_id: 8,
+        precio_unitario: Decimal128('700.00')
+      }
+    ],
+    origen: 'prueba',
+    cliente: {
+      mail: 'juan.perez@mail.com',
+      nombre: 'Juan',
+      apellido: 'Pérez',
+      usuario_id: 2
+    },
+    forma_pago: 'TARJETA'
+  },
+  {
+    _id: 8,
+    fecha: ISODate('2026-10-31T00:00:00.000Z'),
+    total: Decimal128('11700.00'),
+    estado: 'PENDIENTE',
+    lineas: [
+      {
+        nombre: 'Muzzarella',
+        cantidad: 3,
+        subtotal: Decimal128('10500.00'),
+        detalle_id: 16,
+        producto_id: 1,
+        precio_unitario: Decimal128('3500.00')
+      },
+      {
+        nombre: 'Coca-Cola 500ml',
+        cantidad: 1,
+        subtotal: Decimal128('1200.00'),
+        detalle_id: 17,
+        producto_id: 7,
+        precio_unitario: Decimal128('1200.00')
+      }
+    ],
+    origen: 'prueba',
+    cliente: {
+      mail: 'lucia.martinez@mail.com',
+      nombre: 'Lucía',
+      apellido: 'Martínez',
+      usuario_id: 3
+    },
+    forma_pago: 'EFECTIVO'
   }
 ]
-b) ids: [3,5]
+b) ids: [3,5,7,8]
 
 --- c) Pedidos que contienen el producto 1 (Muzzarella) ---
 [
@@ -141,9 +213,73 @@ b) ids: [3,5]
       usuario_id: 1
     },
     forma_pago: 'EFECTIVO'
+  },
+  {
+    _id: 7,
+    fecha: ISODate('2026-10-31T00:00:00.000Z'),
+    total: Decimal128('4200.00'),
+    estado: 'PENDIENTE',
+    lineas: [
+      {
+        nombre: 'Muzzarella',
+        cantidad: 1,
+        subtotal: Decimal128('3500.00'),
+        detalle_id: 14,
+        producto_id: 1,
+        precio_unitario: Decimal128('3500.00')
+      },
+      {
+        nombre: 'Agua mineral 500ml',
+        cantidad: 1,
+        subtotal: Decimal128('700.00'),
+        detalle_id: 15,
+        producto_id: 8,
+        precio_unitario: Decimal128('700.00')
+      }
+    ],
+    origen: 'prueba',
+    cliente: {
+      mail: 'juan.perez@mail.com',
+      nombre: 'Juan',
+      apellido: 'Pérez',
+      usuario_id: 2
+    },
+    forma_pago: 'TARJETA'
+  },
+  {
+    _id: 8,
+    fecha: ISODate('2026-10-31T00:00:00.000Z'),
+    total: Decimal128('11700.00'),
+    estado: 'PENDIENTE',
+    lineas: [
+      {
+        nombre: 'Muzzarella',
+        cantidad: 3,
+        subtotal: Decimal128('10500.00'),
+        detalle_id: 16,
+        producto_id: 1,
+        precio_unitario: Decimal128('3500.00')
+      },
+      {
+        nombre: 'Coca-Cola 500ml',
+        cantidad: 1,
+        subtotal: Decimal128('1200.00'),
+        detalle_id: 17,
+        producto_id: 7,
+        precio_unitario: Decimal128('1200.00')
+      }
+    ],
+    origen: 'prueba',
+    cliente: {
+      mail: 'lucia.martinez@mail.com',
+      nombre: 'Lucía',
+      apellido: 'Martínez',
+      usuario_id: 3
+    },
+    forma_pago: 'EFECTIVO'
   }
 ]
-c) ids: [1]
+c) ids: [1,7,8]
 
 --- c) variante: producto 1 con cantidad >= 2 ---
 [
@@ -176,6 +312,38 @@ c) ids: [1]
       nombre: 'Ana',
       apellido: 'García',
       usuario_id: 1
+    },
+    forma_pago: 'EFECTIVO'
+  },
+  {
+    _id: 8,
+    fecha: ISODate('2026-10-31T00:00:00.000Z'),
+    total: Decimal128('11700.00'),
+    estado: 'PENDIENTE',
+    lineas: [
+      {
+        nombre: 'Muzzarella',
+        cantidad: 3,
+        subtotal: Decimal128('10500.00'),
+        detalle_id: 16,
+        producto_id: 1,
+        precio_unitario: Decimal128('3500.00')
+      },
+      {
+        nombre: 'Coca-Cola 500ml',
+        cantidad: 1,
+        subtotal: Decimal128('1200.00'),
+        detalle_id: 17,
+        producto_id: 7,
+        precio_unitario: Decimal128('1200.00')
+      }
+    ],
+    origen: 'prueba',
+    cliente: {
+      mail: 'lucia.martinez@mail.com',
+      nombre: 'Lucía',
+      apellido: 'Martínez',
+      usuario_id: 3
     },
     forma_pago: 'EFECTIVO'
   }
@@ -260,6 +428,38 @@ c) ids: [1]
       nombre: 'Mariano',
       apellido: 'Chirino',
       usuario_id: 4
+    },
+    forma_pago: 'EFECTIVO'
+  },
+  {
+    _id: 8,
+    fecha: ISODate('2026-10-31T00:00:00.000Z'),
+    total: Decimal128('11700.00'),
+    estado: 'PENDIENTE',
+    lineas: [
+      {
+        nombre: 'Muzzarella',
+        cantidad: 3,
+        subtotal: Decimal128('10500.00'),
+        detalle_id: 16,
+        producto_id: 1,
+        precio_unitario: Decimal128('3500.00')
+      },
+      {
+        nombre: 'Coca-Cola 500ml',
+        cantidad: 1,
+        subtotal: Decimal128('1200.00'),
+        detalle_id: 17,
+        producto_id: 7,
+        precio_unitario: Decimal128('1200.00')
+      }
+    ],
+    origen: 'prueba',
+    cliente: {
+      mail: 'lucia.martinez@mail.com',
+      nombre: 'Lucía',
+      apellido: 'Martínez',
+      usuario_id: 3
     },
     forma_pago: 'EFECTIVO'
   }

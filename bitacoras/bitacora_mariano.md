@@ -6,7 +6,7 @@ Registro de lo que hice y por qué, para poder volver a consultarlo. Se unifica 
 
 Según `DIVISION_DE_TRABAJO.md`: **Parte 1 completa** (modelo documental, migración con `insertMany()`, dos reglas de integridad y justificación de lo embebido), **consulta 4** en MongoDB (a a d) con `consultas_mongodb.js`, y al final el **armado del informe PDF**, el `README.md` y la unificación de bitácoras. El armado del PDF lo tomé de Facundo para repartir mejor la carga.
 
-Estado al día de hoy (2026-10-30): H0, H1, H2 y H3 hechos con los 5 pedidos de `data.sql`. Pendiente: pedidos de prueba de Andrés (H1b), informe PDF, `README.md` y unificación de bitácoras.
+Estado al día de hoy (2026-10-31): H0, H1, H2 y H3 hechos; migración repetida con los 7 pedidos (5 de `data.sql` y 2 de prueba de Andrés). Pendiente: informe PDF, `README.md` y unificación de bitácoras.
 
 ## Mi entorno (H0)
 
@@ -83,8 +83,26 @@ Armado: `plantilla_food_store` con `schema.sql` → `objects.sql` → `data.sql`
 | Ejecutar con `mongosh --file` y no con Compass | Compass | Repetible y deja salida en texto como evidencia; Compass solo para capturas del informe |
 | Commitear en `main` | Una rama por parte (`parte-1-modelo`) | Ya había avanzado en `main` y funciona sin problemas; no aporta crear una rama ahora |
 
+## Segunda migración, con los pedidos de prueba (2026-10-31)
+
+Revisé el repo de Andrés y encontré que su tabla de verificación decía 3 pedidos PENDIENTE en ambos motores (ids 3, 5, 7), pero su propia evidencia de PostgreSQL mostraba 4 (3, 5, 7, 8) y MongoDB todavía tenía solo 5 documentos (b = [3,5], c = [1]). Por eso la tabla no estaba respaldada por una ejecución de MongoDB. La corregimos entre los dos.
+
+| Paso | Resultado |
+|---|---|
+| Comprobé que mi base tenía 6 pedidos y corrí `modelo/pedidos_de_prueba.sql` una sola vez | Se crearon los pedidos 7 (4200.00) y 8 (11700.00), ambos PENDIENTE |
+| Agregué 7 y 8 al `IN (...)` de `exportar_pedidos.sql`, repetí export y migración | `Insertados: 7`, `countDocuments: 7` |
+| Reglas de integridad | Ambas dan `[]` |
+| b) `PENDIENTE` | ids `[3, 5, 7, 8]` |
+| c) producto 1 | ids `[1, 7, 8]`; variante `$elemMatch` (cantidad ≥ 2): pedidos 1 y 8 |
+| d) total > 10000.00 | ids `[2, 5, 8]` (11900.00, 18700.00, 11700.00) |
+| Comparación con PostgreSQL de Andrés | b) 4 y 4, c) 3 y 3; los ids coinciden |
+
+Observación: la fecha de los pedidos 7 y 8 es 2026-10-31 en mi base y 2026-10-30 en la de Andrés, porque `fecha` toma la fecha del día en que se crean. No afecta la comparación.
+Umbral de d): sigue siendo 10000; el promedio de los 7 totales es 9200.
+
 ## Pendiente
 
-- Pedidos de prueba de Andrés (H1b): si se crean, agregar sus ids al `IN (...)` de `exportar_pedidos.sql`, repetir export y migración, y revisar el umbral de d).
-- Informe PDF (hasta 5 páginas), cuando Andrés y Facundo entreguen su parte, y capturas de Compass para las evidencias.
-- `README.md` y unificación de bitácoras en `BITACORA.md` (al final del trabajo).
+- Sacar de nuevo `compass_coleccion.png` (ahora hay 7 documentos).
+- Actualizar `esquema_documental.md`, `README.md` y `CONTEXTO_IA.md` con los 7 pedidos.
+- Informe PDF (hasta 5 páginas), cuando Facundo entregue el contraste y la conclusión.
+- Unificación de bitácoras en `BITACORA.md` (al final del trabajo).
