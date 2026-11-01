@@ -29,7 +29,7 @@ y 2 pedidos de prueba). No se migra toda la base ni se usa Redis, Neo4j o un clu
 | `evidencias/respuesta_ia.md` y `evidencias/contraste_ia.md` | Respuesta completa de la IA, dos afirmaciones contrastadas y conclusion | Facundo |
 | `informe_u7.pdf` | Informe de hasta 5 paginas con modelo, evidencias, tabla de verificacion, contraste de la IA y conclusion | Mariano (armado); Facundo (contraste y conclusion) |
 
-Material de apoyo: `evidencias/` (salidas de ejecucion y capturas de Compass), `BITACORA.md` (registro de lo hecho),
+Material de apoyo: `evidencias/` (salidas de ejecucion; capturas de Compass en `evidencias/capturas/`), `BITACORA.md` (registro de lo hecho),
 `DIVISION_DE_TRABAJO.md`, `AGENTS.md` y `.kiro/steering/` (reglas del proyecto para la IA), `base_heredada/` (los `.sql`
 de Food Store de las unidades anteriores, sin modificar).
 
@@ -106,7 +106,7 @@ El contraste de las afirmaciones de la IA y la conclusion estan en el informe y 
 ## Uso de IA
 
 Mariano trabajo con Claude (migracion, consultas de MongoDB, informe); Andres, con OpenCode (consultas de PostgreSQL y
-tabla de verificacion); Facundo, con [COMPLETAR: herramienta usada para la consigna 6]. Todo se ejecuto antes de aceptarlo.
+tabla de verificacion); Facundo, con Claude (consulta de la consigna 6; el prompt esta en `evidencias/respuesta_ia.md`). Todo se ejecuto antes de aceptarlo.
 La ejecucion encontro un error que la lectura no habia visto: la primera tabla de verificacion decia que los resultados
 coincidian (3 y 3 pedidos) sin haberla contrastado con las salidas guardadas, y la evidencia mostraba 4 y 3 en PostgreSQL
 y 2 y 1 en MongoDB; se rehizo con los resultados reales de ambos motores. `BITACORA.md` y el informe lo detallan.

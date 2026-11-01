@@ -65,9 +65,9 @@ El JSON se generó desde PostgreSQL con `modelo/exportar_pedidos.sql` (sin tipea
 
 ### Capturas de Compass
 
-![Colección pedidos en Compass (vista de tabla): 7 documentos; _id Int32, fecha Date, total Decimal128, estado String](evidencias/compass_coleccion.png)
+![Colección pedidos en Compass (vista de tabla): 7 documentos; _id Int32, fecha Date, total Decimal128, estado String](evidencias/capturas/compass_coleccion.png)
 
-![Documento del pedido 1 con cliente y líneas embebidos; importes en Decimal128](evidencias/compass_pedido1.png)
+![Documento del pedido 1 con cliente y líneas embebidos; importes en Decimal128](evidencias/capturas/compass_pedido1.png)
 
 ## 4. Tabla de verificación PostgreSQL vs. MongoDB
 
@@ -82,8 +82,21 @@ Las consultas de PostgreSQL (`consultas_postgresql.sql`) se limitan a los mismos
 
 ## 5. Contraste de afirmaciones de la IA
 
-> **PENDIENTE — Facundo:** dos afirmaciones concretas de la respuesta de la IA (consigna 6), cada una contrastada con la documentación oficial de MongoDB o con un resultado del laboratorio, indicando si se sostiene.
+Se consultó a una IA para comparar PostgreSQL y MongoDB en el almacenamiento y la consulta de pedidos de Food Store, indicándole el modelo relacional actual, el acceso frecuente a pedidos completos y la necesidad de conservar la coherencia de cantidades y precios. La respuesta completa está en `evidencias/respuesta_ia.md`; el contraste detallado, en `evidencias/contraste_ia.md`. Se contrastaron dos de sus afirmaciones:
+
+| Afirmación de la IA | ¿Se sostiene? | Contraste |
+|---|---|---|
+| 1. «MongoDB no soporta reglas de integridad referencial ni validación de esquemas avanzadas; la coherencia de importes y cantidades depende exclusivamente de la aplicación» | **Solo en parte** | **Cierto:** MongoDB no tiene claves foráneas. **Falso:** sí valida esquemas; la documentación oficial describe la validación con `$jsonSchema` ([Schema Validation](https://www.mongodb.com/docs/manual/core/schema-validation/)). **Laboratorio:** `consultas_mongodb.js` crea la colección con un validador (estados, tipos `Decimal128`, cantidad entera ≥ 1, al menos una línea) y los 7 documentos entraron sin error. **Límite:** la regla «total = suma de subtotales» no la cubre el validador; se verificó aparte con una agregación (0 documentos), mientras que en PostgreSQL la garantizan los triggers. |
+| 2. «Al embeber cliente e ítems en `pedidos` se elimina por completo la sobrecarga de los JOINs y se recupera el pedido completo en una sola operación» | **En parte** | **Documentación:** el modelo embebido permite recuperar datos relacionados en una sola operación y mejora el rendimiento de lectura, pero es desnormalizado y duplica datos ([Embedding](https://www.mongodb.com/docs/manual/data-modeling/embedding/)). **Laboratorio:** la consulta c) devuelve cada pedido completo, con cliente y líneas, sin `$lookup`. **No verificado:** el rendimiento, porque con 7 documentos no se midió ningún tiempo; «por completo» no tiene respaldo. **Costo omitido:** lo embebido es una copia (si cambia el mail de un cliente, el documento no se entera). |
 
 ## 6. Conclusión
 
-> **PENDIENTE — Facundo:** hasta 200 palabras, con al menos dos criterios técnicos, que responda si conviene mantener PostgreSQL, usar MongoDB para este subconjunto o combinar ambas tecnologías.
+Conviene **combinar ambas tecnologías**, manteniendo PostgreSQL como sistema de registro.
+
+**Integridad.** PostgreSQL garantiza la coherencia de importes, cantidades y stock con restricciones, claves foráneas y triggers dentro de `sp_crear_pedido`. En MongoDB el validador controla tipos, estados y cantidades, pero no hay claves foráneas y la regla «total = suma de subtotales» hubo que verificarla aparte. Por eso las altas y modificaciones de pedidos deben seguir en PostgreSQL.
+
+**Lectura.** El pedido completo cabe en un solo documento y se recupera con una consulta, sin `$lookup`, lo que encaja con el acceso frecuente a pedidos completos. La documentación indica mejor rendimiento de lectura, pero el laboratorio, con 7 documentos, no lo midió. El costo es duplicar datos del cliente y del producto.
+
+El precio histórico no diferencia a los motores: ambos lo conservan copiando `precio_unitario` en cada línea.
+
+Una copia de lectura de pedidos finalizados en MongoDB es razonable si el patrón de acceso lo justifica; con esta evidencia no alcanza para migrar la operación completa.

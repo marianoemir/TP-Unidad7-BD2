@@ -1,9 +1,9 @@
 # ============================================================
-# TP Unidad 6 - Food Store (respaldo, monitoreo y recuperacion)
+# TP Unidad 7 - Food Store (NoSQL con MongoDB)
 # ============================================================
 
-# Respaldos y logs de ejecucion: se generan en local y NO se versionan.
-# La evidencia se entrega como copia en evidencias/.
+# Logs y respaldos: se generan en local y NO se versionan.
+# La evidencia se guarda como .txt o imagen en evidencias/ (el .gitignore excluye *.log).
 backups/
 logs/
 *.dump
@@ -27,6 +27,7 @@ pgpass.conf
 respaldos/
 
 # Archivos temporales y de sistema
+~$*
 *.tmp
 *.swp
 *~

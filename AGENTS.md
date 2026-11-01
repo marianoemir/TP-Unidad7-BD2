@@ -14,10 +14,10 @@ criterio crítico sobre lo que sugiere la IA.
 
 | Componente | Tecnología / Versión | Propósito |
 |---|---|---|
-| Base relacional | PostgreSQL 16+ (el servidor del equipo corre 17) | Fuente de los datos y consultas de comparación |
-| Base documental | MongoDB (consola `mongosh`; Compass opcional; local o Atlas, a confirmar) | Colección de pedidos |
+| Base relacional | PostgreSQL 16+ (Mariano 17.10, Andrés 16) | Fuente de los datos y consultas de comparación |
+| Base documental | MongoDB 9.0.4 local (consola `mongosh` 2.14; Compass para las capturas) | Colección de pedidos |
 | Clientes | pgAdmin 4, `psql`, `mongosh` | Ejecutar y capturar evidencias |
-| Entregables | `consultas_mongodb.js`, `consultas_postgresql.sql`, `informe_u7.pdf` | Ver "Las tres partes" |
+| Entregables | `consultas_mongodb.js`, `consultas_postgresql.sql`, `informe_u7.pdf` (se redacta en `informe_u7.md`) | Ver "Las tres partes" |
 
 ## Alcance (regla principal): migración PARCIAL
 
@@ -66,11 +66,12 @@ Opcional (solo si se hace la comparación de rendimiento): carga_masiva.sql → 
 food-store-tp-u7/
 ├── consultas_mongodb.js        creación, migración (insertMany) y consultas a) a d)
 ├── consultas_postgresql.sql    consultas equivalentes b) y c), con JOIN
-├── informe_u7.pdf              hasta 5 páginas
-├── modelo/                     esquema documental y mapeo relacional → documento
-├── evidencias/                 salidas y capturas (.txt o imagen) y la respuesta completa de la IA
-├── bitacoras/                  una bitácora personal por integrante (se unifican al final)
-├── BITACORA.md  DIVISION_DE_TRABAJO.md  README.md  AGENTS.md
+├── informe_u7.md               informe en Markdown (se convierte a PDF)
+├── informe_u7.pdf              entrega, hasta 5 páginas
+├── modelo/                     esquema documental, export desde PostgreSQL, pedidos de prueba y JSON exportado
+├── evidencias/                 salidas (.txt), tabla de verificación, respuesta y contraste de la IA
+│   └── capturas/               capturas de Compass (.png)
+├── BITACORA.md  DIVISION_DE_TRABAJO.md  README.md  AGENTS.md  CONTEXTO_IA.md
 ├── base_heredada/              los 10 .sql de Food Store (U1–U4), sin modificar
 └── .kiro/steering/             contexto del proyecto
 ```
@@ -141,15 +142,25 @@ La consigna aclara que los nombres del material son ilustrativos y que se usa la
 | 6 | Sofía (5) | EFECTIVO | 6×4 | CANCELADO | Sí |
 
 Con los pedidos 1, 2, 3, 5 y 6 se llega al mínimo de cinco. **Ningún producto se repite entre ellos**: una búsqueda
-por producto devuelve un único pedido. Para que la comparación de la consulta c) sea más significativa conviene
-sumar pedidos de prueba (regla 12).
+por producto devuelve un único pedido. Por eso se crearon dos pedidos de prueba (regla 12), con
+`modelo/pedidos_de_prueba.sql`:
+
+| Pedido | Cliente | Pago | Productos (id × cantidad) | Estado | Total | Origen |
+|---|---|---|---|---|---|---|
+| 7 | Juan (2) | TARJETA | 1×1, 8×1 | PENDIENTE | 4200.00 | `prueba` |
+| 8 | Lucía (3) | EFECTIVO | 1×3, 7×1 | PENDIENTE | 11700.00 | `prueba` |
+
+Se migran los 7 pedidos (1, 2, 3, 5, 6, 7 y 8). Resultado real: b) `PENDIENTE` → 3, 5, 7, 8; c) producto 1 → 1, 7, 8;
+d) total > 10000 → 2, 5, 8. La `fecha` de los pedidos de prueba es la del día en que se crean en cada equipo.
 
 ## Trampas conocidas
 
 - **`use` no funciona dentro de un `.js`.** Es un comando del shell interactivo. En un script usar
   `db = db.getSiblingDB('foodstore_nosql')`.
-- **En `mongosh` un número suelto es `Double`.** Para respetar `INTEGER` usar `NumberInt(...)` y para importes
-  `NumberDecimal("...")`. Comparar contra un importe también con `NumberDecimal`.
+- **Tipos numéricos.** Para importes usar siempre `NumberDecimal("...")` (y comparar contra un importe también con
+  `NumberDecimal`), nunca un número suelto. Para enteros, `NumberInt(...)` fija el tipo; en este laboratorio `_id`
+  quedó `Int32` sin conversión (se vio en Compass), pero conviene ser explícito. El tipo de `detalle_id`,
+  `producto_id` y `usuario_id` dentro de los documentos no se verificó.
 - **`insertMany()` falla con clave duplicada si se repite** (el `_id` es el `pedido.id`). Antes de re-migrar,
   vaciar **solo** la colección del TP: `db.pedidos.drop()`.
 - **Buscar en un arreglo de objetos:** `"lineas.producto_id": N` sirve para una condición; para varias condiciones
@@ -157,6 +168,17 @@ sumar pedidos de prueba (regla 12).
 - **Una fecha `DATE` de PostgreSQL pasa a `Date` en UTC** (medianoche). Es una decisión de modelo para anotar.
 - **pgAdmin muestra solo la grilla de la última sentencia** de un script: ejecutar las consultas de a una.
 - **Las evidencias `.log` no se versionan:** guardar la salida como `.txt`.
+- **PowerShell 5.1 y los acentos.** El operador `>` guarda en UTF-16. Para guardar evidencia usar
+  `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8` y `| Out-File -Encoding utf8 archivo.txt`; para el export,
+  `$env:PGCLIENTENCODING = "UTF8"`.
+- **`psql` no está en el PATH:** usar la ruta completa (`C:\Program Files\PostgreSQL\17\bin\psql.exe`).
+- **Fin de línea en Windows:** Git puede marcar archivos como modificados solo por CRLF/LF. No se commitean
+  (`git config core.autocrlf true`).
+- **Pedidos de prueba una sola vez por base.** Si `pedidos_de_prueba.sql` se corre dos veces se crean los pedidos 9 y
+  10 y los ids dejan de coincidir entre los equipos. Antes comprobar que la base tiene 6 pedidos.
+- **Compass no se actualiza solo** después de migrar: usar el botón de refrescar antes de sacar una captura.
+- **Una tabla de resultados se contrasta siempre con las salidas guardadas.** Una tabla de verificación generada con IA
+  decía «3 y 3, coinciden» sin respaldo y hubo que rehacerla (ver `BITACORA.md`).
 
 ## Criterios de evaluación
 

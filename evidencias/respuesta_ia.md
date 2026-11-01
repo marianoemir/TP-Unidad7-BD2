@@ -1,5 +1,15 @@
 # Respuesta de la IA — Evaluación de arquitectura de datos para Food Store
 
+**Herramienta de IA:** Claude (Anthropic).
+
+## Prompt enviado
+
+> Hola. Estamos analizando la arquitectura de datos para 'Food Store', una aplicación de pedidos de comida. Actualmente usamos PostgreSQL con un modelo relacional donde las tablas principales son pedido y detalle_pedido, vinculadas con usuario y producto. Los patrones de acceso del sistema leen con alta frecuencia el pedido completo (su cabecera con los datos del cliente y todas sus líneas de detalle). Además, es fundamental garantizar la coherencia en las cantidades y conservar los precios históricos de los productos en cada línea de pedido al momento de la venta.
+>
+> Necesitamos evaluar si conviene migrar el almacenamiento de pedidos a MongoDB (modelo documental NoSQL) embiendo las líneas de detalle y los datos básicos del cliente dentro del propio documento de pedido, o si es preferible mantener PostgreSQL. Compara ambas tecnologías considerando rendimiento de lectura, integridad transaccional, consistencia de precios e impacto en consultas de analítica/reportes.
+
+---
+
 ## 1. Comparativa de Modelos de Datos
 
 ### PostgreSQL (Relacional)
