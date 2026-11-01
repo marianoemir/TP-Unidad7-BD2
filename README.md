@@ -10,7 +10,7 @@
 Trabajo practico de Bases de Datos II (Tecnicatura Universitaria en Programacion, UTN FRM). Representa en MongoDB una
 parte ya implementada de Food Store (**pedidos y detalle de pedidos**), ejecuta consultas y las compara con PostgreSQL,
 y fundamenta la eleccion tecnologica contrastando lo que sugiere una IA. Probado en Windows con PowerShell 5.1,
-PostgreSQL 16 y 17, MongoDB 9.0.4 y `mongosh` 2.14.0. Equipo: Mariano Chirino, Andres y Facundo.
+PostgreSQL 16 y 17, MongoDB 9.0.4 y `mongosh` 2.14.0. Equipo: Mariano Chirino, Andres Fabre y Facundo Quiroga.
 
 La migracion es **parcial** a proposito: una coleccion `pedidos` con 7 documentos (los 5 pedidos vigentes de `data.sql`
 y 2 pedidos de prueba). No se migra toda la base ni se usa Redis, Neo4j o un cluster.

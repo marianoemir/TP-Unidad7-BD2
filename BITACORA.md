@@ -34,6 +34,9 @@ la carga masiva (200.000 pedidos). MongoDB: servidor local; Compass solo para la
 | 2026-10-31 | Mariano | Revisó el repo de Andrés, encontró que la tabla no coincidía con la evidencia, corrió los pedidos de prueba en su base, repitió el export y la migración (7 documentos) | `evidencias/mongo_migracion_y_consultas.txt`; `evidencias/tabla_verificacion.md`; commit `a2a2cd5` |
 | 2026-10-31 | Facundo | H0 con MongoDB, ejecución de `consultas_mongodb.js`, consulta a la IA, primer contraste y conclusión | `evidencias/respuesta_ia.md`, `evidencias/contraste_ia.md`; commit `a1272ca` |
 | 2026-11-01 | Mariano | Revisó el contraste de la IA, lo corrigió, corrigió las bitácoras personales de Andrés y Facundo y cerró el merge a `main` | `evidencias/contraste_ia.md`; commits `b5bf7a2` y `481f4e1` |
+| 2026-11-01 | Mariano | Revisión final del repo con la IA: se agregó la verificación de subtotal = cantidad × precio (script y `evidencias/verificacion_export_json.txt`), se acotó el texto de la regla 2, se citó la ejecución de PostgreSQL 17 y se regeneró el PDF | `consultas_mongodb.js`, `informe_u7.md`, `informe_u7.pdf` |
+| 2026-11-01 | Mariano | Sacó las capturas de la pestaña *Validation* de Compass (unidas en una sola imagen) y se agregaron al informe | `evidencias/capturas/compass_validation.png` |
+| 2026-11-01 | Mariano | Volvió a correr `consultas_mongodb.js` con la regla 1b: `Insertados: 7`, reglas 1, 1b y 2 en `[]`, ids de b) y c) sin cambios | `evidencias/mongo_migracion_y_consultas.txt` |
 
 ## 4. Resultados verificados contra la evidencia
 
@@ -109,4 +112,5 @@ Lo que mostró la IA: las afirmaciones de la respuesta de la consigna 6 se sosti
 - Facundo: guardar la salida de su ejecución de `consultas_mongodb.js` (hoy figura solo como declarada).
 - Andrés: revisar el informe y el PDF contra las evidencias y las 5 páginas.
 - Facundo: comprobar que su contraste y su conclusión quedaron fieles en el informe.
+- Opcional: captura de la consulta c) en Compass.
 - Regenerar `informe_u7.pdf` si cambia el informe.

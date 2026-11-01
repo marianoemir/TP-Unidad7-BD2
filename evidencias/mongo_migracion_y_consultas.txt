@@ -4,6 +4,9 @@ countDocuments: 7
 --- Regla 1 - total distinto de la suma de subtotales (esperado: []) ---
 []
 
+--- Regla 1b - lineas con subtotal distinto de cantidad x precio_unitario (esperado: []) ---
+[]
+
 --- Regla 2 - lineas con cantidad <= 0 (esperado: []) ---
 []
 

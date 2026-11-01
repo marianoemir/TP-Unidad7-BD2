@@ -74,7 +74,7 @@ console.log('Insertados: ' + Object.keys(res.insertedIds).length);
 console.log('countDocuments: ' + db.pedidos.countDocuments());
 
 // ----------------------------------------------------------------------------
-// 3) VERIFICACION DE INTEGRIDAD POSTERIOR A LA MIGRACION (ambas deben dar [])
+// 3) VERIFICACION DE INTEGRIDAD POSTERIOR A LA MIGRACION (las tres deben dar [])
 // ----------------------------------------------------------------------------
 // Regla 1: total = suma de subtotales
 mostrar('Regla 1 - total distinto de la suma de subtotales (esperado: [])',
@@ -82,6 +82,14 @@ mostrar('Regla 1 - total distinto de la suma de subtotales (esperado: [])',
     { $addFields: { suma: { $sum: '$lineas.subtotal' } } },
     { $match: { $expr: { $ne: ['$suma', '$total'] } } },
     { $project: { total: 1, suma: 1 } }
+  ]).toArray());
+
+// Regla 1b: cada subtotal = cantidad x precio_unitario
+mostrar('Regla 1b - lineas con subtotal distinto de cantidad x precio_unitario (esperado: [])',
+  db.pedidos.aggregate([
+    { $unwind: '$lineas' },
+    { $match: { $expr: { $ne: ['$lineas.subtotal', { $multiply: ['$lineas.cantidad', '$lineas.precio_unitario'] }] } } },
+    { $project: { 'lineas.detalle_id': 1, 'lineas.subtotal': 1 } }
   ]).toArray());
 
 // Regla 2: lineas con cantidad no positiva
@@ -112,7 +120,7 @@ mostrar('c) variante: producto 1 con cantidad >= 2',
   db.pedidos.find({ lineas: { $elemMatch: { producto_id: 1, cantidad: { $gte: 2 } } } }).toArray());
 
 // d) Total mayor a un umbral.
-//    UMBRAL = 10000.00 (a confirmar con los datos reales: queda por encima del promedio de los
-//    totales de data.sql, ~9700, asi que separa los pedidos "grandes" de los chicos).
+//    UMBRAL = 10000.00 (queda por encima del promedio de los 7 totales
+//    migrados (9200), asi que separa los pedidos "grandes" de los chicos).
 mostrar('d) Pedidos con total > 10000.00',
   db.pedidos.find({ total: { $gt: NumberDecimal('10000.00') } }).sort({ _id: 1 }).toArray());

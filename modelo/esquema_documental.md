@@ -42,12 +42,12 @@ Pedidos y detalle de pedidos de Food Store. Tablas y claves en PostgreSQL:
 | `DATE` | `Date` (medianoche UTC) | Consultable por rango; la zona horaria es una decisión a anotar |
 | ENUM | string | Conservar los valores existentes |
 
-**Evidencia de tipos.** En Compass (`evidencias/capturas/compass_coleccion.png`) se ve `_id` como `Int32`, `fecha` como `Date` y `total` como `Decimal128`. El validador de la colección exige `cantidad` entera y los importes decimales, y los 7 documentos lo cumplieron al insertarse. El tipo de `detalle_id`, `producto_id` y `usuario_id` dentro de los documentos no se verificó.
+**Evidencia de tipos.** En Compass (`evidencias/capturas/compass_coleccion.png`) se ve `_id` como `Int32`, `fecha` como `Date` y `total` como `Decimal128`. El validador de la colección (visible en `evidencias/capturas/compass_validation.png`) exige `cantidad` entera y los importes decimales, y los 7 documentos lo cumplieron al insertarse. El tipo de `detalle_id`, `producto_id` y `usuario_id` dentro de los documentos no se verificó.
 
 ## 4. Dos reglas de integridad (consigna 3)
 
-1. **Coherencia de importes:** `total` = suma de `subtotal`, y cada `subtotal` = `cantidad × precio_unitario`. En PostgreSQL la garantizan los triggers; en MongoDB se copian sin recalcular y se **verifican después de migrar** (agregación en `consultas_mongodb.js`). Resultado real: 0 documentos que la violen. El validador no cubre esta regla.
-2. **Líneas válidas y vigentes:** `cantidad > 0`, estado dentro del conjunto permitido y sin registros con `eliminado = TRUE`. Se refuerza con el validador `$jsonSchema` de la colección (estados y formas de pago permitidos, `cantidad` entera ≥ 1, importes `Decimal128`, al menos una línea) y con una consulta de comprobación. Resultado real: 0 líneas con cantidad ≤ 0.
+1. **Coherencia de importes:** `total` = suma de `subtotal`, y cada `subtotal` = `cantidad × precio_unitario`. En PostgreSQL la garantizan los triggers; en MongoDB se copian sin recalcular y se **verifican después de migrar** (agregación en `consultas_mongodb.js`). Resultado real en MongoDB: 0 documentos donde el total difiera de la suma y 0 líneas donde el subtotal difiera de `cantidad × precio_unitario` (dos agregaciones de `consultas_mongodb.js`). Se comprobó además sobre el JSON exportado (`evidencias/verificacion_export_json.txt`). El validador no cubre esta regla.
+2. **Líneas válidas y vigentes:** `cantidad > 0`, estado dentro del conjunto permitido y sin registros con `eliminado = TRUE` (estos últimos no llegan a MongoDB: los excluye el export y el campo no se migra). Se refuerza con el validador `$jsonSchema` de la colección (estados y formas de pago permitidos, `cantidad` entera ≥ 1, importes `Decimal128`, al menos una línea) y con una consulta de comprobación. Resultado real: 0 líneas con cantidad ≤ 0.
 
 ## 5. Qué se embebió y por qué (consigna 3)
 
