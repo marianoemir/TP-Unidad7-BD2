@@ -71,7 +71,7 @@ food-store-tp-u7/
 ├── modelo/                     esquema documental, export desde PostgreSQL, pedidos de prueba y JSON exportado
 ├── evidencias/                 salidas (.txt), tabla de verificación, respuesta y contraste de la IA
 │   └── capturas/               capturas de Compass (.png)
-├── BITACORA.md  DIVISION_DE_TRABAJO.md  README.md  AGENTS.md  CONTEXTO_IA.md
+├── BITACORA.md  README.md  AGENTS.md  CONTEXTO_IA.md
 ├── base_heredada/              los 10 .sql de Food Store (U1–U4), sin modificar
 └── .kiro/steering/             contexto del proyecto
 ```

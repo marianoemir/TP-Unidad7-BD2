@@ -30,7 +30,7 @@ y 2 pedidos de prueba). No se migra toda la base ni se usa Redis, Neo4j o un clu
 | `informe_u7.pdf` | Informe de hasta 5 paginas con modelo, evidencias, tabla de verificacion, contraste de la IA y conclusion | Mariano (armado); Facundo (contraste y conclusion) |
 
 Material de apoyo: `evidencias/` (salidas de ejecucion; capturas de Compass en `evidencias/capturas/`), `BITACORA.md` (registro de lo hecho),
-`DIVISION_DE_TRABAJO.md`, `AGENTS.md` y `.kiro/steering/` (reglas del proyecto para la IA), `base_heredada/` (los `.sql`
+`AGENTS.md` y `.kiro/steering/` (reglas del proyecto para la IA), `base_heredada/` (los `.sql`
 de Food Store de las unidades anteriores, sin modificar).
 
 ## Requisitos

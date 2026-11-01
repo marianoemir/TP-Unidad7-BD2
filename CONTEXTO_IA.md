@@ -120,7 +120,7 @@ Capturas de Compass (vista de tabla, 7 documentos y tipos) y del pedido 1 desple
 | `modelo/esquema_documental.md` | Esquema, tipos, reglas de integridad, justificación y pedidos migrados |
 | `evidencias/` | `mongo_migracion_y_consultas.txt`, `pg_verificacion_h0.txt`, `postgres_b.txt`, `postgres_c.txt`, `tabla_verificacion.md`, `respuesta_ia.md`, `contraste_ia.md` |
 | `evidencias/capturas/` | `compass_coleccion.png`, `compass_pedido1.png` |
-| `informe_u7.md`, `informe_u7.pdf`, `README.md`, `BITACORA.md`, `DIVISION_DE_TRABAJO.md`, `AGENTS.md`, `CONTEXTO_IA.md` (todos en la raíz) | Informe, documentación y seguimiento |
+| `informe_u7.md`, `informe_u7.pdf`, `README.md`, `BITACORA.md`, `AGENTS.md`, `CONTEXTO_IA.md` (todos en la raíz) | Informe, documentación y seguimiento |
 
 Ejecución (desde la raíz del repo, Windows PowerShell 5.1):
 ```powershell

@@ -8,18 +8,18 @@ ni cadenas de conexión. La bitácora no es entregable: es el registro de qué h
 
 | Integrante | A su cargo | Estado |
 |---|---|---|
-| Mariano Chirino | Parte 1 (modelo y migración), consigna 4 (MongoDB), informe, README, unificación de bitácoras | Hecho; pendiente la conversión final a PDF |
+| Mariano Chirino | Parte 1 (modelo y migración), consigna 4 (MongoDB), informe, README, unificación de bitácoras | Hecho |
 | Andrés | Consigna 5 (consultas en PostgreSQL), pedidos de prueba, tabla de verificación | Hecho; tabla corregida entre Mariano y Andrés |
 | Facundo | Consignas 6 y 7 (IA, contraste, conclusión); instalar MongoDB y revisar `consultas_mongodb.js` | Hecho; contraste corregido |
 
-El armado del informe pasó de Facundo a Mariano el 2026-10-30 para repartir mejor la carga (ver `DIVISION_DE_TRABAJO.md`).
+El armado del informe pasó de Facundo a Mariano el 2026-10-30 para repartir mejor la carga (el documento de reparto se eliminó del repo al final).
 
 ## 2. Entornos
 
 | Integrante | Servidores y versiones | Conteos `usuario` / `producto` / `pedido` | Respaldo |
 |---|---|---|---|
-| Mariano | PostgreSQL 17.10, base `foodstore`; MongoDB 9.0.4; `mongosh` 2.14.0; Windows PowerShell 5.1 | 6 / 16 / 6 con `data.sql`; 6 / 16 / 8 con los pedidos de prueba | `evidencias/pg_verificacion_h0.txt` (6 pedidos, el 4 con `eliminado = t`). **Los conteos de `usuario` y `producto` no tienen salida guardada** |
-| Andrés | PostgreSQL 16, base `foodstore7` | 6 / 16 / 8 | `evidencias/postgres_b.txt` y `postgres_c.txt` (muestran los pedidos 7 y 8). **Los conteos no tienen salida guardada** |
+| Mariano | PostgreSQL 17.10, base `foodstore`; MongoDB 9.0.4; `mongosh` 2.14.0; Windows PowerShell 5.1 | 6 / 16 / 8 (con `data.sql` y los pedidos de prueba) | `evidencias/pg_conteos.txt` (6 / 16 / 8) y `evidencias/pg_verificacion_h0.txt` (6 pedidos con `data.sql`, el 4 con `eliminado = t`). El 6 / 16 / 6 previo a los pedidos de prueba no tiene salida guardada |
+| Andrés | PostgreSQL 16, base `foodstore7` | 6 / 16 / 8 (según su bitácora personal) | `evidencias/postgres_b.txt` y `postgres_c.txt` (muestran los pedidos 7 y 8). El conteo de Andrés no tiene salida guardada; el de Mariano, que coincide, sí |
 | Facundo | MongoDB 9.0.4; `mongosh` 2.14.1; Windows PowerShell | — | Declarado por Facundo en su bitácora personal (`ping` con `ok: 1`, 7 documentos insertados). **Sin salida guardada** |
 
 Armado de PostgreSQL: `plantilla_food_store` con `schema.sql` → `objects.sql` → `data.sql`, `foodstore` creada con esa plantilla y `views.sql`. No se corrió
@@ -47,11 +47,13 @@ la carga masiva (200.000 pedidos). MongoDB: servidor local; Compass solo para la
 | c) producto 1 | MongoDB ids 1, 7, 8; PostgreSQL ids 1, 7, 8 | Idem y `evidencias/postgres_c.txt` |
 | d) total > 10000.00 | MongoDB ids 2, 5, 8 (11900.00, 18700.00, 11700.00) | `evidencias/mongo_migracion_y_consultas.txt` |
 | Totales de los pedidos de prueba | Pedido 7: 4200.00; pedido 8: 11700.00 | Ambas evidencias |
+| Conteos en el servidor de Mariano | 6 usuarios, 16 productos, 8 pedidos | `evidencias/pg_conteos.txt` |
+| `consultas_postgresql.sql` en el servidor de Mariano (PostgreSQL 17) | b) ids 3, 5, 7, 8; c) ids 1, 7, 8, los mismos que en la base de Andrés | `evidencias/postgres_ejecucion_mariano.txt` |
 | Tipos en Compass | `_id` Int32, `fecha` Date, `total` Decimal128 | `evidencias/capturas/compass_coleccion.png` |
 | Promedio de los 7 totales | 9200 (umbral de d) = 10000) | Cálculo sobre los totales de arriba |
 | Fecha de los pedidos | 2026-10-30 los de `data.sql`; los de prueba, 2026-10-31 en la migración de Mariano y 2026-10-30 en la base de Andrés | `evidencias/postgres_b.txt` y la salida de Mongo. `fecha` toma el día en que se crea el pedido; no afecta la comparación |
 
-**Sin respaldo guardado:** los conteos 6 / 16 / 6 y 6 / 16 / 8, la ejecución local de Facundo y la ejecución de `consultas_postgresql.sql` en el servidor de Mariano.
+**Sin respaldo guardado:** el conteo previo a los pedidos de prueba (6 / 16 / 6), el conteo de Andrés y la ejecución local de Facundo.
 Cada una se resuelve guardando la salida en un `.txt` de `evidencias/`.
 
 ## 5. Interacciones con IA
@@ -68,7 +70,7 @@ Lo que mostró la IA: las afirmaciones de la respuesta de la consigna 6 se sosti
 
 | Quién revisó | Qué | Qué encontró |
 |---|---|---|
-| Mariano | `consultas_postgresql.sql`, evidencias y tabla de Andrés | Consultas correctas (estado, `JOIN` con `eliminado = FALSE` en ambas tablas, mismos ids). La tabla no estaba respaldada: PostgreSQL daba 4 y 3 y MongoDB tenía 5 documentos. Causa: los pedidos 7 y 8 no estaban migrados. Se migraron y la tabla se rehízo. **La ejecución del `.sql` en el servidor de Mariano está pendiente** |
+| Mariano | `consultas_postgresql.sql`, evidencias y tabla de Andrés | Consultas correctas (estado, `JOIN` con `eliminado = FALSE` en ambas tablas, mismos ids). La tabla no estaba respaldada: PostgreSQL daba 4 y 3 y MongoDB tenía 5 documentos. Causa: los pedidos 7 y 8 no estaban migrados. Se migraron y la tabla se rehízo. Mariano ejecutó el `.sql` en su servidor y obtuvo los mismos ids (`evidencias/postgres_ejecucion_mariano.txt`) |
 | Mariano | Contraste de la IA de Facundo | Cuatro correcciones: afirmación 1 («totalmente falsa» → solo en parte), afirmación 2 («sí» → en parte, sin medición de rendimiento), la conclusión presentaba el precio histórico como ventaja de MongoDB (PostgreSQL también lo guarda en `precio_unitario`) y faltan el prompt y la herramienta. El encabezado de «196 palabras» pasó a unas 164 |
 | Facundo | `consultas_mongodb.js` en su equipo | 7 documentos insertados y resultados coherentes con la evidencia de Mariano (b, c y d con los mismos ids), según su bitácora; sin salida guardada. Pendiente: comprobar que su contraste quedó fiel en el informe |
 | Andrés | Modelo y migración; el PDF contra las evidencias y las 5 páginas | Pendiente |
@@ -104,7 +106,7 @@ Lo que mostró la IA: las afirmaciones de la respuesta de la consigna 6 se sosti
 
 ## 9. Pendiente
 
-- Guardar las salidas que faltan en `evidencias/`: conteos de las tres tablas y la ejecución de `consultas_postgresql.sql` en el servidor de Mariano.
+- Facundo: guardar la salida de su ejecución de `consultas_mongodb.js` (hoy figura solo como declarada).
 - Andrés: revisar el informe y el PDF contra las evidencias y las 5 páginas.
 - Facundo: comprobar que su contraste y su conclusión quedaron fieles en el informe.
 - Regenerar `informe_u7.pdf` si cambia el informe.
